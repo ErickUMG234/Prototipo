@@ -28,7 +28,9 @@ app.use((req, res, next) => {
 
 
 const corsOptions = {
-   origin: process.env.FRONTEND_URL || 'https://erick234-001-site1.ftempurl.com/', // Permitir solo solicitudes desde Vite
+    origin: 'https://samayac-erick-ixcots-projects.vercel.app', // Reemplaza esto con la URL de tu frontend en Vercel
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Los métodos HTTP permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Permitir solo solicitudes desde Vite
     optionsSuccessStatus: 200
 };
 
@@ -135,7 +137,7 @@ run
 //LOGIN
 //____________________________________________________________________
 // **Ruta de login**
-app.post('api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     console.log(`Intentando iniciar sesión con email: ${email}`);
     console.log('Datos enviados:', { email, password });
