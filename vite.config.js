@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   // Cargamos las variables de entorno
   const API_URL = mode === 'development'
     ? 'http://localhost:3000' // URL del backend para desarrollo
-    : 'https://erick234-001-site1.ftempurl.com/'; // URL del backend para producción
+    : 'https://erick234-001-site1.ftempurl.com/mi-backend/back';// URL del backend para producción
 
   return {
     plugins: [react()],
