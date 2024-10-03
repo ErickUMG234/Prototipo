@@ -4,10 +4,11 @@ import axios from "axios";
 
 
 
-const URL = 'http://localhost:5000';
 
 export const axiosInstance = axios.create({
-    baseURL: URL,
-    timeout: 6000, // Tiempo máximo de espera para la respuesta
-   
+    baseURL: 'https://erick234-001-site1.ftempurl.com/mi-backend/mi-backend',  // Actualiza con tu URL correcta
+    timeout: 7000,  // Ajusta el tiempo de espera si es necesario
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });

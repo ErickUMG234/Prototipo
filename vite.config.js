@@ -1,17 +1,30 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
-/*export default defineConfig({
-  plugins: [react()],
-})*/
+// Exportamos la configuración
+export default defineConfig(({ mode }) => {
+  // Cargamos las variables de entorno
+  const API_URL = mode === 'development'
+    ? 'http://localhost:3000' // URL del backend para desarrollo
+    : 'https://erick234-001-site1.ftempurl.com/'; // URL del backend para producción
 
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/Materiales': 'http://localhost:5000',
-    }
+  return {
+    plugins: [react()],
+    server: {
+      // Configuración solo para el entorno de desarrollo
+      proxy: {
+        '/Materiales': {
+          target: API_URL,
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+    // Opciones para producción (opcional)
+    build: {
+      outDir: 'dist', // Carpeta de salida para la build
+      sourcemap: mode === 'development' ? true : false, // Mapa de fuentes en desarrollo
+    },
   }
 });
+

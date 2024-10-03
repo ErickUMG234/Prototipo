@@ -6,8 +6,9 @@ const sql = require('mssql');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
-const SECRET_KEY = 'your_secret_key';
+//const SECRET_KEY = 'your_secret_key';
 const multer = require('multer');
 
 
@@ -27,23 +28,53 @@ app.use((req, res, next) => {
 
 
 const corsOptions = {
-    origin: 'http://localhost:5173', // Permitir solo solicitudes desde Vite
+   origin: process.env.FRONTEND_URL || 'https://erick234-001-site1.ftempurl.com/', // Permitir solo solicitudes desde Vite
     optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions)); // Aplica CORS a todas las rutas
 
-// Configuración de la base de datos SQL Server
 const dbConfig = {
-    user: 'sa',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_NAME,
+    options: {
+        encrypt: true,
+        trustServerCertificate: true
+    }
+};
+
+const SECRET_KEY = process.env.SECRET_KEY;
+
+
+  
+  app.use(cors(corsOptions));
+  
+
+// Configuración de la base de datos SmarterASP
+/*const dbConfig = {
+    user: 'db_aad8c4_bdsamayac_admin',
     password: 'erick123',
-    server: 'DESKTOP-SG90P1Q', // dirección de tu servidor SQL Server
+    server: 'sql8005.site4now.net', // dirección de tu servidor SQL Server
     database: 'BDSamayac',
     options: {
         encrypt: true, // Usa true si estás en Azure, de lo contrario false
         trustServerCertificate: true // solo en desarrollo
     }
-};
+};*/
+
+// Configuración de la base de datos SQL Server
+/*const dbConfig = {
+    user: 'db_aad8c4_bdsamayac_admin',
+    password: 'erick123',
+    server: 'sql8005.site4now.net', // dirección de tu servidor SQL Server
+    database: 'BDSamayac',
+    options: {
+        encrypt: true, // Usa true si estás en Azure, de lo contrario false
+        trustServerCertificate: true // solo en desarrollo
+    }
+};*/
 
 // Importar las rutas de egresos
 const egresosRoutes = require('./routes/egresos');
@@ -98,13 +129,13 @@ const upload = multer({ storage: storage });
 }
 
 // Llama a la función para registrar un usuario
-registerUser('admin', 'admin@gmail.com', '123', 3);*/
-
+registerUser('bodeguero', 'bodeguero@gmail.com', 'bodeguero789');*/
+run
 
 //LOGIN
 //____________________________________________________________________
 // **Ruta de login**
-app.post('/login', async (req, res) => {
+app.post('api/login', async (req, res) => {
     const { email, password } = req.body;
     console.log(`Intentando iniciar sesión con email: ${email}`);
     console.log('Datos enviados:', { email, password });
@@ -199,7 +230,8 @@ app.get('/me', (req, res) => {
 app.get('/Materiales', async (req, res) => {
     try {
         await sql.connect(dbConfig);
-        const result = await sql.query`SELECT * FROM Materiales`; // Consulta a la base de datos
+        const request = new sql.Request();
+        const result = await request().query`SELECT * FROM Materiales`; // Consulta a la base de datos
         res.json(result.recordset);
     } catch (err) {
         console.error(err);
@@ -226,6 +258,7 @@ app.post('/Materiales',async (req, res) => {
         const query = `INSERT INTO Materiales (nombre_material, descripcion, unidades, Cantidad_disponible, fecha_registro) 
                        VALUES (@nombre_material, @descripcion, @unidades, @Cantidad_disponible, @fecha_registro)`;
 
+                    
                        const request = new sql.Request();
                        request.input('nombre_material', sql.NVarChar, nombre_material);
                        request.input('descripcion', sql.NVarChar, descripcion);
@@ -422,7 +455,277 @@ app.put('/Proveedores/:id_proveedor', async (req, res) => {
         request.input('telefono', sql.NVarChar, telefono); 
         request.input('email', sql.NVarChar, email);
 
-        const result = await request.query(query);
+        const result = await pool.request().query(query);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(409).send('Proveedor no encontrado');
+        }
+
+        res.status(200).send('Proveedor actualizado correctamente');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('ERROR al actualizar el Proveedor');
+    }
+});
+
+
+//Conexion a la base de datos para ingresar Proveedores
+//______________________________________________________________
+// Insertar nuevos datos en la tabla Proveedores
+app.post('/Proveedores', async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+        const { nombre_proveedor, contacto, direccion, telefono, email } = req.body;
+        
+        if (!nombre_proveedor || !contacto || !direccion || !telefono || !email) {
+            return res.status(403).send('Faltan datos necesarios para crear el proveedor');
+        }
+
+        const query = `
+            INSERT INTO Proveedores (nombre_proveedor, contacto, direccion, telefono, email)
+            VALUES (@nombre_proveedor, @contacto, @direccion, @telefono, @email)
+        `;
+
+        const request = new sql.Request();
+        request.input('nombre_proveedor', sql.NVarChar, nombre_proveedor);
+        request.input('contacto', sql.NVarChar, contacto);
+        request.input('direccion', sql.NVarChar, direccion);
+        request.input('telefono', sql.NVarChar, telefono);
+        request.input('email', sql.NVarChar, email);
+
+        // Me ayuda a ver qué datos estoy enviando al servidor
+        console.log({
+            nombre_proveedor,
+            contacto,
+            direccion,
+            telefono,
+            email
+        });
+
+        await request.query(query);
+        res.status(201).send('Proveedor creado exitosamente');
+    } catch (err) {
+        console.error('Error al crear el proveedor:', err);
+        res.status(500).send('Error al crear el proveedor');
+    }
+});
+
+app.get('/Usuarios', async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+        const result = await sql.query`SELECT * FROM Usuario`; // Consulta a la base de datos
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error en la solicitud');
+    }
+});
+
+
+
+//Conexion a la base de datos para ingresar los ingresos
+//______________________________________________________________
+// Insertar nuevos datos en la tabla Ingresos
+app.post('/Ingresos', upload.single('solicitud_recibido'), async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+        console.log('Datos recibidos en el cuerpo de la solicitud:', req.body);
+        console.log('Archivo recibido:', req.file);
+        const { id_material, id_proveedor, cantidad_ingresada, fecha_ingreso, id_usuario } = req.body;
+        const solicitud_recibido = req.file ? req.file.filename : null;
+        
+        if (!id_material || !id_proveedor || !cantidad_ingresada || !fecha_ingreso || !id_usuario) {
+            console.log('Faltan datos requeridos para registrar el ingreso');
+            return res.status(403).send('Faltan datos necesarios para crear el ingreso');
+        }
+        //const formattedDate= convertDateFormat(fecha_ingreso);
+    
+        const query = `INSERT INTO Ingresos (id_material, id_proveedor, cantidad_ingresada, fecha_ingreso, id_usuario, solicitud_recibido) 
+                       VALUES (@id_material, @id_proveedor, @cantidad_ingresada, @fecha_ingreso, @id_usuario, @solicitud_recibido)`;
+
+        const request = new sql.Request();
+        request.input('id_material', sql.Int, id_material);
+        request.input('id_proveedor', sql.Int, id_proveedor);
+        request.input('cantidad_ingresada', sql.Int, cantidad_ingresada);
+        request.input('fecha_ingreso', sql.DateTime, new Date(fecha_ingreso));
+        request.input('id_usuario', sql.Int, id_usuario);
+        request.input('solicitud_recibido', sql.NVarChar(sql.MAX), solicitud_recibido);
+
+        console.log({
+            id_material,
+            id_proveedor,
+           cantidad_ingresada,
+           fecha_ingreso,
+           id_usuario,
+           solicitud_recibido
+       });
+       
+
+        await request.query(query);
+        res.status(201).send('Ingreso registrado exitosamente');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error al registrar el ingreso');
+    }
+});
+
+
+
+
+app.get('/Ingresos', async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+
+        const result = await sql.query(`
+            SELECT 
+                i.id_ingreso, 
+                m.nombre_material, 
+                p.nombre_proveedor, 
+                u.nombre_usuario, 
+                i.cantidad_ingresada, 
+                i.fecha_ingreso, 
+                i.solicitud_recibido
+            FROM 
+                Ingresos i
+            JOIN 
+                Materiales m ON i.id_material = m.id_material
+            JOIN 
+                Proveedores p ON i.id_proveedor = p.id_proveedor
+            JOIN 
+                Usuario u ON i.id_usuario = u.id_usuario;
+        `);
+
+        res.status(200).json(result.recordset);
+        console.log('datos obtenidos', req.body);
+    } catch (error) {
+        console.error('Error al obtener los ingresos:', error);
+        res.status(500).send('Error al obtener los ingresos');
+    }
+
+    
+});
+
+app.get('/egresos', async (req, res) => {
+    try {
+        // Conexión a la base de datos
+        await sql.connect(dbConfig);
+
+        // Consulta SQL
+        const query = `
+            SELECT 
+                e.id_egreso,
+                m.nombre_material,
+                i.cantidad_ingresada,
+                e.cantidad_egresada,
+                e.fecha_egreso,
+                u.nombre_solicitante,
+                u.area_solicitante
+            FROM 
+                Egresos e
+            JOIN 
+                Materiales m ON e.id_material = m.id_material
+            JOIN 
+                Ubicacion u ON e.id_ubicacion = u.id_ubicacion
+            LEFT JOIN
+                Ingresos i ON e.id_material = i.id_material;
+        `;
+
+        // Ejecutar la consulta
+        const result = await sql.query(query);
+
+        // Devolver los datos en formato JSON
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Error al obtener los detalles de los egresos:', err);
+        res.status(500).send('Error al obtener los detalles de los egresos');
+    }
+});
+
+
+
+
+
+
+
+
+
+//Conexion a la base de datos para Proveedores
+//______________________________________________________________
+
+app.get('/Proveedores', async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+        const result = await sql.query`SELECT * FROM Proveedores`; // Consulta a la base de datos
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error en la solicitud');
+    }
+});
+
+
+
+
+
+//Conexion a la base de datos para Eliminacion de Proveedores
+//______________________________________________________________
+
+// Eliminar un Proveedor existente
+app.delete('/Proveedores/:id_proveedor', async (req, res) => {
+    const { id_proveedor } = req.params; 
+
+    try {
+        await sql.connect(dbConfig); // Conectar a la base de datos
+        const query = 'DELETE FROM Proveedores WHERE id_proveedor = @id_proveedor'; 
+        const request = new sql.Request();
+        request.input('id_proveedor', sql.Int, id_proveedor); 
+
+        const result = await request.query(query); 
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).send('proveedor no encontrado'); 
+        }
+
+        res.status(200).send('proveedor eliminado correctamente'); 
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('proveedor al eliminar el material'); 
+    }
+});
+
+//Conexion a la base de datos para actualizar los Proveedores
+//______________________________________________________________
+
+// Actualizar un proveedor existente
+app.put('/Proveedores/:id_proveedor', async (req, res) => {
+    const { id_proveedor } = req.params;
+    const { nombre_proveedor, contacto, direccion, telefono, email } = req.body;
+
+    if (!nombre_proveedor || !contacto || !direccion || !telefono || !email) {
+        return res.status(400).send('Todos los campos son obligatorios');
+    }
+
+    const query = `
+        UPDATE Proveedores
+        SET nombre_proveedor = @nombre_proveedor, 
+            contacto = @contacto, 
+            direccion = @direccion, 
+            telefono = @telefono, 
+            email = @email
+        WHERE id_proveedor = @id_proveedor
+    `;
+
+    try {
+       
+        const request = new sql.Request();
+        request.input('id_proveedor', sql.Int, id_proveedor);
+        request.input('nombre_proveedor', sql.NVarChar, nombre_proveedor);
+        request.input('contacto', sql.NVarChar, contacto);
+        request.input('direccion', sql.NVarChar, direccion);
+        request.input('telefono', sql.NVarChar, telefono); 
+        request.input('email', sql.NVarChar, email);
+
+        const result = await pool.request().query(query);
 
         if (result.rowsAffected[0] === 0) {
             return res.status(409).send('Proveedor no encontrado');
@@ -615,7 +918,7 @@ app.get('/egresos', async (req, res) => {
 
 
 // Inicia el servidor
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
 
 

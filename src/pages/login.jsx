@@ -26,7 +26,7 @@ const Login = () => {
 
         try {
             console.log('Datos enviados:', { email, password });
-            const response = await axiosInstance.post('/login', { email, password });
+            const response = await axiosInstance.post('api/login', { email, password });
             console.log('Respuesta del backend:', response.data);
             localStorage.setItem('token', response.data.token);  // Almacena el token en el localStorage
             navigate('/home'); // Redirige a la página principal después de un login exitoso
