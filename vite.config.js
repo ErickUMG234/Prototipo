@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   // Cargamos las variables de entorno
   const API_URL = mode === 'development'
     ? 'http://localhost:3000' // URL del backend para desarrollo
-    : 'mi-backend-production-84d7.up.railway.app';// URL del backend para producción
+    : 'https://mi-backend-production-84d7.up.railway.app';// URL del backend para producción
 
   return {
     plugins: [react()],
