@@ -29,8 +29,8 @@ app.use((req, res, next) => {
 
 const corsOptions = {
     origin: 'https://samayac-erick-ixcots-projects.vercel.app', // Reemplaza esto con la URL de tu frontend en Vercel
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Los métodos HTTP permitidos
-    allowedHeaders: ['Content-Type', 'Authorization'], // Permitir solo solicitudes desde Vite
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos HTTP permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
     optionsSuccessStatus: 200
 };
 
@@ -51,7 +51,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 
   
-  app.use(cors(corsOptions));
+
   
 
 // Configuración de la base de datos SmarterASP
@@ -132,7 +132,7 @@ const upload = multer({ storage: storage });
 
 // Llama a la función para registrar un usuario
 registerUser('bodeguero', 'bodeguero@gmail.com', 'bodeguero789');*/
-run
+
 
 //LOGIN
 //____________________________________________________________________
