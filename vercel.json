@@ -14,8 +14,17 @@
             "src":"/login",
             "dest": "/"
 
+        },
+        {
+            "src":"/create/ingreso",
+            "dest": "/"
+
+        },
+        {
+            "src":"/create/egreso",
+            "dest": "/"
+
         }
-        
 
 
     ]
