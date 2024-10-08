@@ -16,6 +16,16 @@
 
         },
         {
+            "src":"/create",
+            "dest": "/"
+
+        },
+        {
+            "src":"/create/proveedores",
+            "dest": "/"
+
+        },
+        {
             "src":"/create/ingreso",
             "dest": "/"
 
@@ -24,7 +34,29 @@
             "src":"/create/egreso",
             "dest": "/"
 
+        },
+        {
+            "src":"/show",
+            "dest": "/"
+
+        },
+        {
+            "src":"/show/proveedores",
+            "dest": "/"
+
+        },
+        {
+            "src":"/show/ingreso",
+            "dest": "/"
+
+        },
+        {
+            "src":"/show/egreso",
+            "dest": "/"
+
         }
+        
+
 
 
     ]
