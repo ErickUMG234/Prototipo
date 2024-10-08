@@ -27,9 +27,14 @@ export default defineConfig(({ mode }) => {
           target: API_URL,
           changeOrigin: true,
           secure: false,
+          '/login': {  // Agrega el proxy para /create/ingreso
+            target: API_URL,
+            changeOrigin: true,
+            secure: false,
         },
       },
     },
+  },
     // Opciones para producción (opcional)
     build: {
       outDir: 'dist', // Carpeta de salida para la build
