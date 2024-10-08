@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 
 const corsOptions = {
     origin: 'https://samayac-erick-ixcots-projects.vercel.app', // Reemplaza esto con la URL de tu frontend en Vercel
+
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos HTTP permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
     optionsSuccessStatus: 200

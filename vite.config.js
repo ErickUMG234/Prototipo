@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   // Cargamos las variables de entorno
   const API_URL = mode === 'development'
     ? 'http://localhost:3000' // URL del backend para desarrollo
-    : 'https://mi-backend-production-84d7.up.railway.app';// URL del backend para producción
+    : 'https://mi-backend-production-84d7.up.railway.app/';// URL del backend para producción
 
   return {
     plugins: [react()],
@@ -14,6 +14,16 @@ export default defineConfig(({ mode }) => {
       // Configuración solo para el entorno de desarrollo
       proxy: {
         '/Materiales': {
+          target: API_URL,
+          changeOrigin: true,
+          secure: false,
+        },
+        '/Ingresos': {  // Agrega la ruta /Ingresos si es que la estás usando
+          target: API_URL,
+          changeOrigin: true,
+          secure: false,
+        },
+        '/create/ingreso': {  // Agrega el proxy para /create/ingreso
           target: API_URL,
           changeOrigin: true,
           secure: false,
