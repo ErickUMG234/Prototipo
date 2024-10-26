@@ -7,7 +7,7 @@ const ShowEgresos = () => {  // Cambia el nombre del componente a ShowProveedore
     const { egresos, dispatch } = useContext(EgresosContext);
   
     useEffect(() => {
-        axiosInstance.get('/egresos')
+        axiosInstance.get('/egreso')
             .then(response => {
                 console.log('Datos recibidos de la API:', response.data);
                 dispatch({ type: 'UPLOAD_EGRESOS', payload: response.data });

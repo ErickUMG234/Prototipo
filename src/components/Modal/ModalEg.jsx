@@ -2,10 +2,10 @@
 import Button from 'react-bootstrap/Button';
 import ModalBs from 'react-bootstrap/Modal';
 
-const ModalEgreso = (props) => {
+
+const ModalEg = (props) => {
     const { egreso } = props;
 
-    
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = date.getUTCDate().toString().padStart(2, '0');
@@ -23,13 +23,24 @@ const ModalEgreso = (props) => {
             </ModalBs.Header>
             <ModalBs.Body className='bg-dark'>
                 <div>
-                <p><strong>id_egreso:</strong> {egreso.id_egreso || 'No especificado'}</p>
-                    <p><strong>Material:</strong> {egreso.nombre_material || 'No especificado'}</p>
-                    <p><strong>Cantidad ingresada:</strong> {egreso.cantidad_ingresada || 'No especificado'}</p>
+                    <p><strong>Nombre del Material:</strong> {egreso.nombre_material || 'No especificado'}</p>
                     <p><strong>Cantidad Egresada:</strong> {egreso.cantidad_egresada || 'No especificado'}</p>
-                    <p><strong>Fecha de Egreso:</strong> {formatDate(egreso.fecha_egreso)}</p>
-                    <p><strong>Nombre del Solicitante:</strong> {egreso.nombre_solicitante || 'No especificado'}</p>
-                    <p><strong>Área del Solicitante:</strong> {egreso.area_solicitante || 'No especificado'}</p>
+                    <p><strong>Cantidad Ingresada:</strong> {egreso.cantidad_ingresada}</p>
+                    <p><strong>Cantidad en Stock:</strong> {egreso.cantidad_en_stock}</p>
+                    <p><strong>Fecha de Egreso:</strong> {egreso.fecha_egreso ? formatDate(egreso.fecha_egreso) : 'No especificado'}</p>
+         
+
+                    
+                    <p><strong>Solicitud Documento:</strong> 
+                        {egreso.solicitud_documento ? (
+                            <a href={`https://mi-backend-production-84d7.up.railway.app/uploads/${egreso.solicitud_documento}`} target="_blank" rel="noopener noreferrer">
+                               {egreso.solicitud_documento}
+                                <i className="bi bi-eye" style={{ fontSize: '1.5em', marginLeft: '10px' }}></i> Ver documento
+                            </a>
+                        ) : (
+                            'No especificado'
+                        )}
+                    </p>
                 </div>
             </ModalBs.Body>
             <ModalBs.Footer className='bg-dark'>
@@ -39,4 +50,4 @@ const ModalEgreso = (props) => {
     );
 };
 
-export default ModalEgreso;
+export default ModalEg;

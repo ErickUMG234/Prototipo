@@ -40,23 +40,28 @@ const FormCreateEgreso = () => {
         fetchData();
     }, []);
 
+ 
     const initialValues = {
-        id_material: '',
-      
-        cantidad_egresada: '',
+        materiales: [{ id_material: '', cantidad_egresada: '' }], // Múltiples materiales
         fecha_egreso: '',
         nombre_ubicacion: '',
         descripcion: '',
         nombre_solicitante: '',
         area_solicitante: '',
         fecha_solicitada: '',
-        solicitud_aprobada: null, // Archivo PDF
+        solicitud_aprobada: null, 
     };
 
     const validationSchema = Yup.object().shape({
-        id_material: Yup.string().required('Selecciona un material'),
-      
-        cantidad_egresada: Yup.number().required('La cantidad egresada es requerida').positive('Debe ser un número positivo'),
+        materiales: Yup.array().of(
+            Yup.object().shape({
+                id_material: Yup.string().required('Selecciona un material'),
+                cantidad_egresada: Yup.number()
+                    .typeError('Debe ser un número válido') // Validación explícita de tipo número
+                    .required('La cantidad es requerida')
+                    .positive('Debe ser un número positivo'),
+            })
+        ),
         fecha_egreso: Yup.date().required('La fecha de egreso es requerida'),
         nombre_ubicacion: Yup.string().required('El nombre de la ubicación es requerido'),
         descripcion: Yup.string().required('La descripción es requerida'),
@@ -67,16 +72,24 @@ const FormCreateEgreso = () => {
     });
 
     const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+        
         if (!usuarioAutenticado || !usuarioAutenticado.id_usuario) {
             setMensaje('Error: No hay un usuario autenticado.');
             setSubmitting(false);
             return;
         }
 
+       
+
+        console.log('Valores enviados:', values); 
         const formData = new FormData();
-        formData.append('id_material', values.id_material);
-        
-        formData.append('cantidad_egresada', values.cantidad_egresada);
+        const materialesConvertidos = values.materiales.map(material => ({
+            ...material,
+            cantidad_egresada: Number(material.cantidad_egresada) || 0, // Asegurarse de que sea un número
+        }));
+        formData.append('materiales', JSON.stringify(materialesConvertidos));
+    
+      
         formData.append('fecha_egreso', values.fecha_egreso);
         formData.append('nombre_ubicacion', values.nombre_ubicacion);
         formData.append('descripcion', values.descripcion);
@@ -102,6 +115,12 @@ const FormCreateEgreso = () => {
         setSubmitting(false);
     };
 
+    // Función para agregar más materiales
+    const agregarMaterial = (setFieldValue, valoresActuales) => {
+        const nuevosMateriales = [...valoresActuales.materiales, { id_material: '', cantidad_egresada: '' }];
+        setFieldValue('materiales', nuevosMateriales);
+    };
+
     if (!isLoaded) {
         return <p>Cargando...</p>;
     }
@@ -118,72 +137,80 @@ const FormCreateEgreso = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
             >
-                {({ isSubmitting, setFieldValue }) => (
+                {({ values, setFieldValue, isSubmitting }) => (
                     <Form>
                         {mensaje && <div className="alert alert-success">{mensaje}</div>}
 
-                        {/* Material */}
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="id_material">Material</label>
-                            <Field as="select" id="id_material" name="id_material" className="form-control">
-                                <option value="">Selecciona un material</option>
-                                {materiales.map(material => (
-                                    <option key={material.id_material} value={material.id_material}>
-                                        {material.nombre_material}
-                                    </option>
-                                ))}
-                            </Field>
-                            <ErrorMessage name="id_material" component="div" className="text-danger" />
-                        </FormBs.Group>
+                        {/* Materiales */}
+                        {values.materiales.map((material, index) => (
+                            <div key={index}>
+                                <FormBs.Group className="mb-3">
+                                    <label htmlFor={`materiales.${index}.id_material`}>Material</label>
+                                    <Field as="select" name={`materiales.${index}.id_material`} className="form-control">
+                                        <option value="">Selecciona un material</option>
+                                        {materiales.map((material) => (
+                                            <option key={material.id_material} value={material.id_material}>
+                                                {material.nombre_material}
+                                            </option>
+                                        ))}
+                                    </Field>
+                                    <ErrorMessage name={`materiales.${index}.id_material`} component="div" className="text-danger" />
+                                </FormBs.Group>
+
+                                <FormBs.Group className="mb-3">
+    <label htmlFor={`materiales.${index}.cantidad_egresada`}>Cantidad Egresada</label>
+    <Field
+        id={`materiales.${index}.cantidad_egresada`}
+        name={`materiales.${index}.cantidad_egresada`}
+        type="number"
+        className="form-control"
+    />
+    <ErrorMessage name={`materiales.${index}.cantidad_egresada`} component="div" className="text-danger" />
+</FormBs.Group>
+                            </div>
+                        ))}
 
                        
+                        <Button variant="secondary" type="button" onClick={() => agregarMaterial(setFieldValue, values)}>
+                            Agregar otro material
+                        </Button>
 
-                        {/* Cantidad Egresada */}
                         <FormBs.Group className="mb-3">
-                            <label htmlFor="cantidad_egresada">Cantidad Egresada</label>
-                            <Field id="cantidad_egresada" type="number" name="cantidad_egresada" className="form-control" />
-                            <ErrorMessage name="cantidad_egresada" component="div" className="text-danger" />
-                        </FormBs.Group>
+    <label htmlFor="fecha_egreso">Fecha de Egreso</label>
+    <Field id="fecha_egreso" name="fecha_egreso" type="date" className="form-control" />
+    <ErrorMessage name="fecha_egreso" component="div" className="text-danger" />
+</FormBs.Group>
 
-                        {/* Fecha de Egreso */}
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="fecha_egreso">Fecha de Egreso</label>
-                            <Field id="fecha_egreso" name="fecha_egreso" type="date" className="form-control" />
-                            <ErrorMessage name="fecha_egreso" component="div" className="text-danger" />
-                        </FormBs.Group>
-
-                        {/* Ubicación */}
-                        <FormBs.Group className="mb-3">
+<FormBs.Group className="mb-3">
                             <label htmlFor="nombre_ubicacion">Ubicación</label>
                             <Field id="nombre_ubicacion" name="nombre_ubicacion" type="text" className="form-control" />
                             <ErrorMessage name="nombre_ubicacion" component="div" className="text-danger" />
                         </FormBs.Group>
 
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="descripcion">Descripción</label>
-                            <Field id="descripcion" name="descripcion" type="text" className="form-control" />
-                            <ErrorMessage name="descripcion" component="div" className="text-danger" />
-                        </FormBs.Group>
+<FormBs.Group className="mb-3">
+    <label htmlFor="descripcion">Descripción</label>
+    <Field id="descripcion" name="descripcion" type="text" className="form-control" />
+    <ErrorMessage name="descripcion" component="div" className="text-danger" />
+</FormBs.Group>
 
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="nombre_solicitante">Nombre del Solicitante</label>
-                            <Field id="nombre_solicitante" name="nombre_solicitante" type="text" className="form-control" />
-                            <ErrorMessage name="nombre_solicitante" component="div" className="text-danger" />
-                        </FormBs.Group>
+<FormBs.Group className="mb-3">
+    <label htmlFor="nombre_solicitante">Nombre del Solicitante</label>
+    <Field id="nombre_solicitante" name="nombre_solicitante" type="text" className="form-control" />
+    <ErrorMessage name="nombre_solicitante" component="div" className="text-danger" />
+</FormBs.Group>
 
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="area_solicitante">Área del Solicitante</label>
-                            <Field id="area_solicitante" name="area_solicitante" type="text" className="form-control" />
-                            <ErrorMessage name="area_solicitante" component="div" className="text-danger" />
-                        </FormBs.Group>
+<FormBs.Group className="mb-3">
+    <label htmlFor="area_solicitante">Área del Solicitante</label>
+    <Field id="area_solicitante" name="area_solicitante" type="text" className="form-control" />
+    <ErrorMessage name="area_solicitante" component="div" className="text-danger" />
+</FormBs.Group>
 
-                        <FormBs.Group className="mb-3">
-                            <label htmlFor="fecha_solicitada">Fecha Solicitada</label>
-                            <Field id="fecha_solicitada" name="fecha_solicitada" type="date" className="form-control" />
-                            <ErrorMessage name="fecha_solicitada" component="div" className="text-danger" />
-                        </FormBs.Group>
-
-                        {/* Subir Documento Aprobado */}
+<FormBs.Group className="mb-3">
+    <label htmlFor="fecha_solicitada">Fecha Solicitada</label>
+    <Field id="fecha_solicitada" name="fecha_solicitada" type="date" className="form-control" />
+    <ErrorMessage name="fecha_solicitada" component="div" className="text-danger" />
+</FormBs.Group>
+                       
                         <FormBs.Group className="mb-3">
                             <label htmlFor="solicitud_aprobada">Subir Documento Aprobado</label>
                             <input
@@ -196,7 +223,6 @@ const FormCreateEgreso = () => {
                             <ErrorMessage name="solicitud_aprobada" component="div" className="text-danger" />
                         </FormBs.Group>
 
-                        {/* Botón de envío */}
                         <Button variant="primary" type="submit" disabled={isSubmitting}>
                             Crear Egreso
                         </Button>

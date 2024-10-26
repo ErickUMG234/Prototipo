@@ -6,6 +6,7 @@ import ModalBs from 'react-bootstrap/Modal';
 const ModalIn = (props) => {
     const { ingreso } = props;
 
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = date.getUTCDate().toString().padStart(2, '0');
@@ -22,14 +23,24 @@ const ModalIn = (props) => {
                 </ModalBs.Title>
             </ModalBs.Header>
             <ModalBs.Body className='bg-dark'>
-               
                 <div>
                     <p><strong>Material:</strong> {ingreso.nombre_material || 'No especificado'}</p>
                     <p><strong>Proveedor:</strong> {ingreso.nombre_proveedor || 'No especificado'}</p>
-                    <p><strong>Cantidad Ingresada:</strong> {ingreso.cantidad_ingresada}</p>
-                    <p><strong>Fecha de Ingreso:</strong> {formatDate(ingreso.fecha_ingreso)}</p>
+                    <p><strong>Cantidad Ingresada:</strong> {ingreso.cantidad_ingreso}</p>
+                    <p><strong>Fecha de Ingreso:</strong> {ingreso.fecha_ingreso ? formatDate(ingreso.fecha_ingreso) : 'No especificado'}</p>
                     <p><strong>Usuario:</strong> {ingreso.nombre_usuario || 'No especificado'}</p>
-                    <p><strong>Solicitud Recibido:</strong> {ingreso.solicitud_recibido ? <a href={`/uploads/${ingreso.solicitud_recibido}`} target="_blank" rel="noopener noreferrer">{ingreso.solicitud_recibido}</a> : 'No especificado'}</p>
+
+                  
+                    <p><strong>Solicitud Recibido:</strong> 
+                        {ingreso.solicitud_recibido ? (
+                            <a href={`https://mi-backend-production-84d7.up.railway.app/uploads/${ingreso.solicitud_recibido}`} target="_blank" rel="noopener noreferrer">
+                               {ingreso.solicitud_recibido}
+                                <i className="bi bi-eye" style={{ fontSize: '1.5em', marginLeft: '10px' }}></i> Ver documento
+                            </a>
+                        ) : (
+                            'No especificado'
+                        )}
+                    </p>
                 </div>
             </ModalBs.Body>
             <ModalBs.Footer className='bg-dark'>

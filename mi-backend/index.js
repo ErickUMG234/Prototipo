@@ -212,20 +212,6 @@ app.get('/me', (req, res) => {
 });
 
 
-/*const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(403).send('Token no proporcionado');
-    }
-
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
-        if (err) {
-            return res.status(401).send('Token inválido');
-        }
-        req.userId = decoded.id;
-        next();
-    });
-};*/
 
 //Conexion a la base de datos para mostrar en pantalla
 //______________________________________________________________
@@ -878,39 +864,39 @@ app.get('/Ingresos', async (req, res) => {
     
 });
 
-app.get('/egresos', async (req, res) => {
+app.get('/egreso', async (req, res) => {
     try {
-        // Conexión a la base de datos
         await sql.connect(dbConfig);
-
-        // Consulta SQL
-        const query = `
+        const result = await sql.query(`
             SELECT 
-                e.id_egreso,
-                m.nombre_material,
-                i.cantidad_ingresada,
-                e.cantidad_egresada,
-                e.fecha_egreso,
-                u.nombre_solicitante,
-                u.area_solicitante
-            FROM 
-                Egresos e
-            JOIN 
-                Materiales m ON e.id_material = m.id_material
-            JOIN 
-                Ubicacion u ON e.id_ubicacion = u.id_ubicacion
-            LEFT JOIN
-                Ingresos i ON e.id_material = i.id_material;
-        `;
+                E.id_egreso, 
+                M.nombre_material, 
+                E.cantidad_egresada AS cantidad_egreso, 
+                (SELECT SUM(I.cantidad_ingreso) 
+                 FROM Ingreso_Material IM 
+                 INNER JOIN Ingresos I ON IM.id_ingreso = I.id_ingreso 
+                 WHERE IM.id_material = M.id_material) AS cantidad_ingreso, 
+                ((SELECT SUM(I.cantidad_ingreso) 
+                  FROM Ingreso_Material IM 
+                  INNER JOIN Ingresos I ON IM.id_ingreso = I.id_ingreso 
+                  WHERE IM.id_material = M.id_material) -
+                 (SELECT SUM(E2.cantidad_egresada) 
+                  FROM Egreso_Material EM2 
+                  INNER JOIN Egresos E2 ON EM2.id_egreso = E2.id_egreso 
+                  WHERE EM2.id_material = M.id_material)) AS cantidad_en_stock,
+                EA.solicitud_aprobada AS solicitud_documento,
+                E.fecha_egreso
+            FROM Egresos E
+            INNER JOIN Egreso_Material EM ON E.id_egreso = EM.id_egreso
+            INNER JOIN Materiales M ON EM.id_material = M.id_material
+            INNER JOIN egreso_aprobado EA ON E.id_egresoaprobado = EA.id_egresoaprobado
+            ORDER BY E.fecha_egreso DESC;
+        `);
 
-        // Ejecutar la consulta
-        const result = await sql.query(query);
-
-        // Devolver los datos en formato JSON
         res.json(result.recordset);
     } catch (err) {
-        console.error('Error al obtener los detalles de los egresos:', err);
-        res.status(500).send('Error al obtener los detalles de los egresos');
+        console.error(err);
+        res.status(500).send('Error al obtener la información de los egresos.');
     }
 });
 

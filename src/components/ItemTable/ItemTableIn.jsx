@@ -9,32 +9,38 @@
 
 
 const ItemTableIn = ({ ingreso, formatDate }) => {
-    const { id_ingreso, nombre_material, nombre_proveedor, cantidad_ingresada, fecha_ingreso, nombre_usuario, solicitud_recibido } = ingreso;
-   
+    const { id_ingreso, nombre_material, nombre_proveedor, cantidad_ingreso, fecha_ingreso, nombre_usuario, solicitud_recibido } = ingreso;
 
-    
-
-   
     return (
         <>
             <tr>
                 <td>{id_ingreso}</td>
-                <td>{nombre_material}</td> 
-                <td>{nombre_proveedor}</td> 
-                <td>{cantidad_ingresada}</td>
-                <td>{formatDate(fecha_ingreso)}</td> 
+                <td>{nombre_material}</td>
+                <td>{nombre_proveedor }</td>
+                <td>{cantidad_ingreso}</td>
+                <td>{formatDate(fecha_ingreso)}</td>
                 <td>{nombre_usuario}</td> 
-                <td>{solicitud_recibido}</td>
-                
-                   
-            
+
+               
+                <td>
+                    {solicitud_recibido ? (
+                        <>
+                            <a href={`https://mi-backend-production-84d7.up.railway.app/uploads/${solicitud_recibido}`} target="_blank" rel="noopener noreferrer">
+                                <i className="bi bi-eye" style={{ fontSize: '1.5em', marginRight: '10px' }}></i>
+                            </a>
+                            {solicitud_recibido}
+                        </>
+                    ) : (
+                        'No especificado'
+                    )}
+                </td>
             </tr>
-            
         </>
     );
 };
 
 export default ItemTableIn;
+
 
 
 
